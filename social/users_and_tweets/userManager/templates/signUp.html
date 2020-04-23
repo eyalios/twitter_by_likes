@@ -1,0 +1,20 @@
+
+{%  extends "base.html" %}
+
+{% block content %}
+    <p align="center">you are already logged in as {{ request.user.username }}</p>
+{% endblock content %}
+{% block nologin %}
+<form method="POST" > {%csrf_token%}
+    {% for field in form %}
+    <div align="center" class="fieldWrapper">
+
+        {{ field.label_tag }}<br>{{ field }}  {{ field.errors }}
+   {% endfor %}
+       <br>
+      <input type="submit" value = 'save'   >
+    </div>
+
+
+</form>
+{%  endblock nologin %}
