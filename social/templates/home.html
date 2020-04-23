@@ -1,0 +1,13 @@
+
+
+{%  extends "base.html" %}
+ {% block content %}
+<h3 align="center"> welcom {{ request.user.username }} go ahead and <a href='/search/'>search</a> tweets to see them by likes</h3>
+
+
+{% endblock content%}
+
+
+{% block nologin %}
+<h3 align="center"> welcome please <a href='/UserManager/login/'>login </a> or  <a href='/UserManager/signUp/'>signup </a> to use site.</h3>
+{% endblock %}

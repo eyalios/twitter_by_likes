@@ -1,0 +1,173 @@
+{%  extends "base.html" %}
+{% block imports %}
+
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+{%  endblock %}
+  <style>
+  #result {
+   position: relative; /*     here               */
+   width: 100%;
+   max-width:870px;
+   cursor: pointer;
+   overflow-y: auto;
+   max-height: 400px;
+   box-sizing: border-box;
+   z-index: 1000000;
+  }
+  .link-class:hover{
+   background-color:blue;
+  }
+  .list-group-item{
+    left: 0;
+    top: 100%;
+    width: 100%;
+  }
+  #successMessage {
+    display:none;
+}
+
+  </style>
+{% block content %}
+
+
+  <div class="container" style="width:900px;">
+   <h2 align="center">search twitter user</h2>
+   <h3 align = "center"> and see his latests 100 tweets orderd by likes</h3>
+   <h3 align = "center">usage: if you want to view @NadavEyalDesk search NadavEyalDesk</h3>
+   <br /><br />
+   <div align="center">
+
+    <input type="text" name="search" id="search" placeholder="go ahead" class="form-control" />
+       <div style="position: relative" align="center">
+       <ul class="list-group"  id="result" style="position: absolute;top: 100%;width:100%"></ul>
+       </div>
+       <input type="submit" value = 'search'   onclick="get_list_from_server()">
+
+       <div id="main_container"></div>
+
+
+
+   </div>
+<div id="successMessage" style="display:none;"> It worked </div>
+
+   <br />
+  </div>
+
+
+<script>
+$(document).ready(function(){
+ create_containers();
+ $.ajaxSetup({ cache: false });
+ $('#search').keyup(function(){
+  $('#result').html('');
+  $('#state').val('');
+  var searchField = $('#search').val();
+  var expression = new RegExp(searchField, "i");
+   if(searchField!="") {
+       $.each({{user_friends | safe}}, function (key, value) {
+
+           if (value.search(expression) != -1) {
+               $('#result').append('<li class="list-group-item link-class" id="test"> ' + value + ' </li>');
+           }
+
+       });
+   }
+ });
+
+ $('#result').on('click', 'li', function() {
+  var click_text = $(this).text().split('|');
+  $('#search').val($.trim(click_text[0]));
+  $("#result").html('');
+ });
+});
+</script>
+<script>
+function get_list_from_server()
+{
+
+    cur_search = $('#search').val();
+    $.ajax(window.location.href, {
+     // type of response data
+    timeout: 50000,
+    type: 'GET',  // http method
+    data: { friend: cur_search },
+    dataType: "json",
+    async: false,
+        // data to submit
+    success: function (data, status, xhr) {
+         console.log( data);
+         if(data.length == 0)
+         {
+             clear_frames();
+             document.getElementById("container0").innerHTML = "nothing to show";
+         }
+         else if(data[0]!="-1")
+         {
+             render_tweets(data);
+         }
+         else
+         {
+            clear_frames();
+            document.getElementById("container0").innerHTML = data[1];
+         }
+
+    },
+    error: function (jqXhr, textStatus, errorMessage) {
+        $('p').append('Error' + errorMessage);
+    }
+});
+}
+</script>
+<script>
+function clear_frames()
+{
+        for(i=0;i<100;i++) {
+
+            cur_element = document.getElementById("container" + i.toString());
+            cur_element.innerHTML = "";
+        }
+}
+function render_tweets(tweetIDS){
+    var i;
+
+    for(i=0;i<100;i++)
+    {
+
+        cur_element = document.getElementById("container" + i.toString());
+        cur_element.innerHTML ="";
+
+        twttr.widgets.createTweet(
+          tweetIDS[i],
+         cur_element
+        ).then( function( el ) {
+        console.log('Tweet added.');
+});
+        twttr.widgets.load(
+            cur_element
+        );
+    }
+
+}
+</script>
+<script>
+    function  create_containers() {
+    var i;
+    var main_container = document.getElementById("main_container");
+        for(i=0;i<100;i++)
+        {
+           var cur_child = document.createElement("div");
+           cur_child.id = "container" + i.toString();
+           cur_child.style="position:static;";
+           main_container.appendChild(cur_child);
+        }
+    }
+
+</script>
+
+{% endblock content %}
+{% block nologin %}
+    <p>you need to be logged in to access this page.</p>
+{% endblock nologin %}
